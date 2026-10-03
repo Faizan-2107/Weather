@@ -1393,9 +1393,13 @@
         ===================================== */
         .connect-dev {
             display: flex;
-            justify-content: center;
-            margin-top: 34px;
-            padding-bottom: 10px;
+            justify-content: flex-end;
+            align-items: center;
+            width: 100%;
+            box-sizing: border-box;
+            margin-top: 42px;
+            padding: 24px 4px 14px;
+            border-top: 1px solid rgba(39, 49, 71, 0.16);
         }
 
         .connect-link {
@@ -1454,7 +1458,10 @@
         }
 
         @media (max-width: 700px) {
-            .connect-dev { margin-top: 28px; }
+            .connect-dev {
+                margin-top: 32px;
+                padding: 20px 2px 12px;
+            }
             .connect-link { width: 46px; height: 46px; }
             .connect-link:hover { width: 46px; transform: none; }
             .connect-link:hover .connect-text { max-width: 0; opacity: 0; margin-left: 0; }
@@ -1517,6 +1524,10 @@
         <!-- Header -->
 
         <header class="header">
+
+            <p class="eyebrow">
+                AI WEATHER AGENT
+            </p>
 
 
             <h1>
