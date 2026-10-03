@@ -1518,6 +1518,11 @@
 
         <header class="header">
 
+            <p class="eyebrow">
+                AI WEATHER AGENT
+            </p>
+
+
             <h1>
                 Weather Dashboard
             </h1>
@@ -1540,9 +1545,6 @@
             <form
                 id="weatherForm"
                 class="search-form"
-                action="javascript:void(0);"
-                method="get"
-                onsubmit="return false;"
             >
 
                 <input
@@ -1555,7 +1557,7 @@
 
 
                 <button
-                    type="submit"
+                    type="button"
                     id="searchButton"
                 >
                     Search
@@ -2581,256 +2583,145 @@
            SEARCH
         ===================================== */
 
-        /* =====================================
-           SEARCH
-        ===================================== */
+        weatherForm.addEventListener(
+            "submit",
+            async function(event) {
 
-        async function searchWeather() {
+                event.preventDefault();
 
-            const city =
-                cityInput.value.trim();
 
-            if (!city) {
-                showError(
-                    "Please enter a city name."
-                );
-                return;
-            }
+                const city =
+                    cityInput.value.trim();
 
-            clearError();
-            showLoading(true);
 
-            try {
+                if (!city) {
 
-                const geoResponse = await fetch(
-                    `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`
-                );
-
-                if (!geoResponse.ok) {
-                    throw new Error(
-                        "Unable to find the city."
+                    showError(
+                        "Please enter a city name."
                     );
+
+                    return;
                 }
 
-                const geoData =
-                    await geoResponse.json();
 
-                if (
-                    !geoData.results ||
-                    geoData.results.length === 0
-                ) {
-                    throw new Error(
-                        "City not found. Please check the city name."
+                clearError();
+
+
+                showLoading(true);
+
+
+                try {
+
+                    const geoResponse = await fetch(
+                        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`
                     );
-                }
 
-                const place =
-                    geoData.results[0];
+                    if (!geoResponse.ok) {
+                        throw new Error("Unable to find the city.");
+                    }
 
-                const weatherResponse =
-                    await fetch(
+                    const geoData = await geoResponse.json();
+
+                    if (!geoData.results || geoData.results.length === 0) {
+                        throw new Error("City not found. Please check the city name.");
+                    }
+
+                    const place = geoData.results[0];
+
+                    const weatherResponse = await fetch(
                         `https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&hourly=precipitation_probability&forecast_days=1&timezone=auto`
                     );
 
-                if (!weatherResponse.ok) {
-                    throw new Error(
-                        "Unable to fetch weather data."
+                    if (!weatherResponse.ok) {
+                        throw new Error("Unable to fetch weather data.");
+                    }
+
+                    const weatherData = await weatherResponse.json();
+                    const current = weatherData.current;
+                    const weatherCode = current.weather_code;
+                    const rainProbability = weatherData.hourly?.precipitation_probability?.[0] ?? 0;
+
+                    function getCondition(code) {
+                        if (code === 0) return "Sunny";
+                        if ([1,2,3].includes(code)) return "Cloudy";
+                        if ([45,48].includes(code)) return "Foggy";
+                        if ([51,53,55,56,57,61,63,65,66,67,80,81,82].includes(code)) return "Rainy";
+                        if ([71,73,75,77,85,86].includes(code)) return "Snowy";
+                        if ([95,96,99].includes(code)) return "Thunderstorm";
+                        return "Cloudy";
+                    }
+
+                    const conditionText = getCondition(weatherCode);
+
+                    let umbrellaText = "No umbrella needed.";
+                    if (rainProbability >= 60 || conditionText === "Rainy" || conditionText === "Thunderstorm") {
+                        umbrellaText = "Carry an umbrella today.";
+                    } else if (rainProbability >= 30) {
+                        umbrellaText = "You may want to carry an umbrella.";
+                    }
+
+                    let summaryText = `It's ${Math.round(current.temperature_2m)}°C and ${conditionText.toLowerCase()} in ${place.name}.`;
+                    if (rainProbability >= 60) {
+                        summaryText += " Rain is quite likely today.";
+                    } else if (rainProbability >= 30) {
+                        summaryText += " There is a chance of rain.";
+                    }
+
+                    const data = {
+                        location: {
+                            city: place.name,
+                            country: place.country || place.country_code || ""
+                        },
+                        weather: {
+                            temperature: current.temperature_2m,
+                            condition: conditionText,
+                            rain_probability: rainProbability,
+                            humidity: current.relative_humidity_2m,
+                            wind_speed: current.wind_speed_10m,
+                            weather_code: weatherCode
+                        },
+                        advice: { umbrella: umbrellaText },
+                        summary: summaryText
+                    };
+
+
+                    displayWeather(
+                        data
+                    );
+
+
+                } catch (
+                    error
+                ) {
+
+                    showError(
+                        error.message ||
+                        "Something went wrong."
+                    );
+
+
+                    weatherDashboard
+                        .classList
+                        .add(
+                            "hidden"
+                        );
+
+
+                    emptyState
+                        .classList
+                        .remove(
+                            "hidden"
+                        );
+
+                    stopWeatherSound();
+
+                } finally {
+
+                    showLoading(
+                        false
                     );
                 }
 
-                const weatherData =
-                    await weatherResponse.json();
-
-                const current =
-                    weatherData.current;
-
-                const weatherCode =
-                    current.weather_code;
-
-                const rainProbability =
-                    weatherData.hourly
-                        ?.precipitation_probability
-                        ?.[0] ?? 0;
-
-                function getCondition(code) {
-
-                    if (code === 0)
-                        return "Sunny";
-
-                    if ([1, 2, 3].includes(code))
-                        return "Cloudy";
-
-                    if ([45, 48].includes(code))
-                        return "Foggy";
-
-                    if (
-                        [
-                            51, 53, 55,
-                            56, 57,
-                            61, 63, 65,
-                            66, 67,
-                            80, 81, 82
-                        ].includes(code)
-                    ) {
-                        return "Rainy";
-                    }
-
-                    if (
-                        [
-                            71, 73, 75,
-                            77, 85, 86
-                        ].includes(code)
-                    ) {
-                        return "Snowy";
-                    }
-
-                    if (
-                        [95, 96, 99].includes(code)
-                    ) {
-                        return "Thunderstorm";
-                    }
-
-                    return "Cloudy";
-                }
-
-                const conditionText =
-                    getCondition(weatherCode);
-
-                let umbrellaText =
-                    "No umbrella needed.";
-
-                if (
-                    rainProbability >= 60 ||
-                    conditionText === "Rainy" ||
-                    conditionText === "Thunderstorm"
-                ) {
-                    umbrellaText =
-                        "Carry an umbrella today.";
-
-                } else if (
-                    rainProbability >= 30
-                ) {
-                    umbrellaText =
-                        "You may want to carry an umbrella.";
-                }
-
-                let summaryText =
-                    `It's ${Math.round(
-                        current.temperature_2m
-                    )}°C and ${conditionText.toLowerCase()} in ${place.name}.`;
-
-                if (rainProbability >= 60) {
-                    summaryText +=
-                        " Rain is quite likely today.";
-
-                } else if (rainProbability >= 30) {
-                    summaryText +=
-                        " There is a chance of rain.";
-                }
-
-                const data = {
-
-                    location: {
-                        city: place.name,
-                        country:
-                            place.country ||
-                            place.country_code ||
-                            ""
-                    },
-
-                    weather: {
-                        temperature:
-                            current.temperature_2m,
-
-                        condition:
-                            conditionText,
-
-                        rain_probability:
-                            rainProbability,
-
-                        humidity:
-                            current.relative_humidity_2m,
-
-                        wind_speed:
-                            current.wind_speed_10m,
-
-                        weather_code:
-                            weatherCode
-                    },
-
-                    advice: {
-                        umbrella:
-                            umbrellaText
-                    },
-
-                    summary:
-                        summaryText
-                };
-
-                displayWeather(data);
-
-            } catch (error) {
-
-                showError(
-                    error.message ||
-                    "Something went wrong."
-                );
-
-                weatherDashboard
-                    .classList
-                    .add("hidden");
-
-                emptyState
-                    .classList
-                    .remove("hidden");
-
-                stopWeatherSound();
-
-            } finally {
-
-                showLoading(false);
-            }
-        }
-
-
-        /*
-         * IMPORTANT:
-         * Do not depend on the form's submit event.
-         * The search button and Enter key call the same
-         * function directly, preventing page navigation.
-         */
-
-        searchButton.addEventListener(
-            "click",
-            function(event) {
-                event.preventDefault();
-                event.stopPropagation();
-                searchWeather();
-            }
-        );
-
-        cityInput.addEventListener(
-            "keydown",
-            function(event) {
-
-                if (event.key === "Enter") {
-
-                    event.preventDefault();
-                    event.stopPropagation();
-
-                    searchWeather();
-                }
-            }
-        );
-
-        weatherForm.addEventListener(
-            "submit",
-            function(event) {
-
-                event.preventDefault();
-                event.stopPropagation();
-
-                return false;
             }
         );
 
@@ -2908,6 +2799,165 @@
 
         createSnow();
 
+    </script>
+
+
+    <!-- =====================================
+         ROBUST SEARCH CONTROLLER
+         Keeps search independent from form submission.
+         ===================================== -->
+    <script>
+    (function () {
+        "use strict";
+
+        const form = document.getElementById("weatherForm");
+        const input = document.getElementById("cityInput");
+        const button = document.getElementById("searchButton");
+        const error = document.getElementById("errorMessage");
+        const loading = document.getElementById("loading");
+        const dashboard = document.getElementById("weatherDashboard");
+        const emptyState = document.getElementById("emptyState");
+
+        if (!input || !button) return;
+
+        function setLoading(value) {
+            if (loading) loading.classList.toggle("hidden", !value);
+            button.disabled = value;
+            button.textContent = value ? "Searching..." : "Search";
+        }
+
+        function setError(message) {
+            if (error) error.textContent = message || "";
+        }
+
+        function visual(code) {
+            if (code === 0) return { icon: "☀️", theme: "sunny", condition: "Clear sky" };
+            if (code <= 3) return { icon: "☁️", theme: "cloudy", condition: "Cloudy" };
+            if (code === 45 || code === 48) return { icon: "🌫️", theme: "foggy", condition: "Foggy" };
+            if (code >= 51 && code <= 67) return { icon: "🌧️", theme: "rainy", condition: "Rainy" };
+            if (code >= 71 && code <= 77) return { icon: "❄️", theme: "snowy", condition: "Snowy" };
+            if (code >= 80 && code <= 82) return { icon: "🌦️", theme: "rainy", condition: "Rain showers" };
+            if (code >= 85 && code <= 86) return { icon: "🌨️", theme: "snowy", condition: "Snow showers" };
+            if (code >= 95) return { icon: "⛈️", theme: "stormy", condition: "Thunderstorm" };
+            return { icon: "🌤️", theme: "cloudy", condition: "Partly cloudy" };
+        }
+
+        function adviceFor(code, rainProbability) {
+            if (code >= 95) return "Carry an umbrella and avoid exposed areas during thunderstorms.";
+            if (rainProbability >= 60 || (code >= 51 && code <= 82)) return "An umbrella may be useful today.";
+            if (code >= 71 && code <= 86) return "Dress warmly and be careful on slippery surfaces.";
+            return "No umbrella is expected to be necessary right now.";
+        }
+
+        async function searchWeatherStandalone() {
+            const city = input.value.trim();
+
+            if (!city) {
+                setError("Please enter a city name.");
+                input.focus();
+                return;
+            }
+
+            setError("");
+            setLoading(true);
+
+            try {
+                const geoURL =
+                    "https://geocoding-api.open-meteo.com/v1/search?name=" +
+                    encodeURIComponent(city) +
+                    "&count=1&language=en&format=json";
+
+                const geoResponse = await fetch(geoURL);
+                if (!geoResponse.ok) throw new Error("Unable to find the city.");
+
+                const geoData = await geoResponse.json();
+                if (!geoData.results || !geoData.results.length) {
+                    throw new Error("City not found. Please check the city name.");
+                }
+
+                const place = geoData.results[0];
+
+                const weatherURL =
+                    "https://api.open-meteo.com/v1/forecast?latitude=" + place.latitude +
+                    "&longitude=" + place.longitude +
+                    "&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m" +
+                    "&hourly=precipitation_probability&forecast_days=1&timezone=auto";
+
+                const weatherResponse = await fetch(weatherURL);
+                if (!weatherResponse.ok) throw new Error("Unable to fetch weather data.");
+
+                const weatherData = await weatherResponse.json();
+                const current = weatherData.current;
+                const code = Number(current.weather_code);
+                const info = visual(code);
+                const rainProbability = Number(
+                    weatherData.hourly && weatherData.hourly.precipitation_probability
+                        ? weatherData.hourly.precipitation_probability[0] || 0
+                        : 0
+                );
+
+                const setText = (id, value) => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = value;
+                };
+
+                setText("locationName", place.name || city);
+                setText("countryName", place.country || "");
+                setText("temperature", Math.round(current.temperature_2m) + "°");
+                setText("condition", info.condition);
+                setText("rainProbability", rainProbability + "%");
+                setText("humidity", Math.round(current.relative_humidity_2m) + "%");
+                setText("windSpeed", Math.round(current.wind_speed_10m) + " km/h");
+                setText("weatherIcon", info.icon);
+                setText("umbrellaAdvice", adviceFor(code, rainProbability));
+                setText(
+                    "summary",
+                    place.name + ": " + info.condition + ", " +
+                    Math.round(current.temperature_2m) + "°C with " +
+                    Math.round(current.relative_humidity_2m) + "% humidity."
+                );
+
+                document.body.classList.remove("sunny", "cloudy", "rainy", "foggy", "snowy", "stormy");
+                document.body.classList.add(info.theme);
+
+                if (dashboard) dashboard.classList.remove("hidden");
+                if (emptyState) emptyState.classList.add("hidden");
+
+            } catch (err) {
+                setError(err && err.message ? err.message : "Something went wrong. Please try again.");
+                if (dashboard) dashboard.classList.add("hidden");
+                if (emptyState) emptyState.classList.remove("hidden");
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // Expose only this function globally so the button cannot depend on the older listener.
+        window.searchWeatherStandalone = searchWeatherStandalone;
+
+        // The button is type="button", so it can never submit/navigate the form.
+        button.addEventListener("click", function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            searchWeatherStandalone();
+        });
+
+        input.addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                event.stopPropagation();
+                searchWeatherStandalone();
+            }
+        });
+
+        if (form) {
+            form.addEventListener("submit", function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                return false;
+            });
+        }
+    })();
     </script>
 
 </body>
