@@ -1525,6 +1525,10 @@
 
         <header class="header">
 
+            <p class="eyebrow">
+                AI WEATHER AGENT
+            </p>
+
 
             <h1>
                 Weather Dashboard
@@ -2053,7 +2057,14 @@
                 return weatherSounds.rain;
             }
 
+            /*
+             * Keep a gentle ambient sound for clear/cloudy
+             * weather too, so the Sound button always has
+             * an audible effect when weather is displayed.
+             */
             if (
+                theme === "sunny" ||
+                theme === "cloudy" ||
                 theme === "snowy" ||
                 theme === "foggy"
             ) {
@@ -2087,8 +2098,10 @@
             currentSound = nextSound;
 
             try {
+                currentSound.currentTime = 0;
                 await currentSound.play();
             } catch (error) {
+                console.error("Weather sound could not play:", error);
                 soundEnabled = false;
 
                 soundButton.textContent =
@@ -2965,4 +2978,4 @@
 
 </body>
 
-</html>
+    </html>
