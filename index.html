@@ -1387,11 +1387,10 @@
             }
         }
 
-
+    
         /* =====================================
            CONNECT WITH DEV
         ===================================== */
-
         .connect-dev {
             display: flex;
             justify-content: center;
@@ -1406,19 +1405,26 @@
             width: 48px;
             height: 48px;
             border-radius: 14px;
-            background: rgba(255, 255, 255, 0.82);
-            border: 1px solid rgba(255, 255, 255, 0.9);
-            box-shadow: 0 10px 30px rgba(40, 57, 90, 0.10);
+            background: rgba(255,255,255,0.88);
+            border: 1px solid rgba(255,255,255,0.9);
+            box-shadow: 0 10px 30px rgba(40,57,90,0.10);
             color: #0a66c2;
             text-decoration: none;
             overflow: hidden;
-            transition: width 0.3s ease, transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+            transition: width .3s ease, transform .2s ease, background .2s ease, box-shadow .2s ease;
             backdrop-filter: blur(12px);
         }
 
         .linkedin-icon {
+            display: grid;
+            place-items: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            background: #0a66c2;
+            color: white;
+            font-size: 15px;
             font-weight: 800;
-            font-size: 20px;
             line-height: 1;
             flex-shrink: 0;
         }
@@ -1430,14 +1436,15 @@
             margin-left: 0;
             font-size: 14px;
             font-weight: 700;
-            transition: max-width 0.3s ease, opacity 0.2s ease, margin-left 0.3s ease;
+            color: #273147;
+            transition: max-width .3s ease, opacity .2s ease, margin-left .3s ease;
         }
 
         .connect-link:hover {
             width: 178px;
             transform: translateY(-2px);
-            background: rgba(255, 255, 255, 0.96);
-            box-shadow: 0 14px 35px rgba(40, 57, 90, 0.16);
+            background: rgba(255,255,255,.96);
+            box-shadow: 0 14px 35px rgba(40,57,90,.16);
         }
 
         .connect-link:hover .connect-text {
@@ -1447,26 +1454,10 @@
         }
 
         @media (max-width: 700px) {
-            .connect-dev {
-                margin-top: 28px;
-            }
-
-            .connect-link {
-                width: 46px;
-                height: 46px;
-            }
-
-            /* Touch devices don't have hover, so keep the compact icon. */
-            .connect-link:hover {
-                width: 46px;
-                transform: none;
-            }
-
-            .connect-link:hover .connect-text {
-                max-width: 0;
-                opacity: 0;
-                margin-left: 0;
-            }
+            .connect-dev { margin-top: 28px; }
+            .connect-link { width: 46px; height: 46px; }
+            .connect-link:hover { width: 46px; transform: none; }
+            .connect-link:hover .connect-text { max-width: 0; opacity: 0; margin-left: 0; }
         }
 
     </style>
@@ -1475,6 +1466,10 @@
 
 
 <body>
+
+    <div class="sound-control">
+        <button id="soundButton" class="sound-button" type="button">🔇 Sound Off</button>
+    </div>
 
 
     <!-- =====================================
@@ -1522,6 +1517,11 @@
         <!-- Header -->
 
         <header class="header">
+
+            <p class="eyebrow">
+                AI WEATHER AGENT
+            </p>
+
 
             <h1>
                 Weather Dashboard
@@ -1855,17 +1855,9 @@
 
         </section>
 
-
         <!-- Connect With Developer -->
         <div class="connect-dev">
-            <a
-                class="connect-link"
-                href="https://www.linkedin.com/in/-faizanali/"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Connect with developer on LinkedIn"
-                title="Connect with developer"
-            >
+            <a class="connect-link" href="https://www.linkedin.com/in/-faizanali/" target="_blank" rel="noopener noreferrer" aria-label="Connect with developer on LinkedIn" title="Connect with developer">
                 <span class="linkedin-icon">in</span>
                 <span class="connect-text">Connect with Dev</span>
             </a>
@@ -2620,27 +2612,77 @@
 
                 try {
 
-                    const response =
-                        await fetch(
-                            `/api/weather?city=${encodeURIComponent(
-                                city
-                            )}`
-                        );
+                    const geoResponse = await fetch(
+                        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`
+                    );
 
-
-                    const data =
-                        await response.json();
-
-
-                    if (
-                        !response.ok
-                    ) {
-
-                        throw new Error(
-                            data.error ||
-                            "Unable to fetch weather."
-                        );
+                    if (!geoResponse.ok) {
+                        throw new Error("Unable to find the city.");
                     }
+
+                    const geoData = await geoResponse.json();
+
+                    if (!geoData.results || geoData.results.length === 0) {
+                        throw new Error("City not found. Please check the city name.");
+                    }
+
+                    const place = geoData.results[0];
+
+                    const weatherResponse = await fetch(
+                        `https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&hourly=precipitation_probability&forecast_days=1&timezone=auto`
+                    );
+
+                    if (!weatherResponse.ok) {
+                        throw new Error("Unable to fetch weather data.");
+                    }
+
+                    const weatherData = await weatherResponse.json();
+                    const current = weatherData.current;
+                    const weatherCode = current.weather_code;
+                    const rainProbability = weatherData.hourly?.precipitation_probability?.[0] ?? 0;
+
+                    function getCondition(code) {
+                        if (code === 0) return "Sunny";
+                        if ([1,2,3].includes(code)) return "Cloudy";
+                        if ([45,48].includes(code)) return "Foggy";
+                        if ([51,53,55,56,57,61,63,65,66,67,80,81,82].includes(code)) return "Rainy";
+                        if ([71,73,75,77,85,86].includes(code)) return "Snowy";
+                        if ([95,96,99].includes(code)) return "Thunderstorm";
+                        return "Cloudy";
+                    }
+
+                    const conditionText = getCondition(weatherCode);
+
+                    let umbrellaText = "No umbrella needed.";
+                    if (rainProbability >= 60 || conditionText === "Rainy" || conditionText === "Thunderstorm") {
+                        umbrellaText = "Carry an umbrella today.";
+                    } else if (rainProbability >= 30) {
+                        umbrellaText = "You may want to carry an umbrella.";
+                    }
+
+                    let summaryText = `It's ${Math.round(current.temperature_2m)}°C and ${conditionText.toLowerCase()} in ${place.name}.`;
+                    if (rainProbability >= 60) {
+                        summaryText += " Rain is quite likely today.";
+                    } else if (rainProbability >= 30) {
+                        summaryText += " There is a chance of rain.";
+                    }
+
+                    const data = {
+                        location: {
+                            city: place.name,
+                            country: place.country || place.country_code || ""
+                        },
+                        weather: {
+                            temperature: current.temperature_2m,
+                            condition: conditionText,
+                            rain_probability: rainProbability,
+                            humidity: current.relative_humidity_2m,
+                            wind_speed: current.wind_speed_10m,
+                            weather_code: weatherCode
+                        },
+                        advice: { umbrella: umbrellaText },
+                        summary: summaryText
+                    };
 
 
                     displayWeather(
