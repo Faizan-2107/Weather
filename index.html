@@ -2453,20 +2453,10 @@
                 if (!started) {
                     soundButton.textContent = "⚠️ Audio unavailable";
                 }
-            } else {
-                /*
-                 * User gesture unlocks audio before any weather search.
-                 * Use Sunny.mp3 as the initial confirmation.
-                 */
-                try {
-                    currentSound = weatherSounds.sunny;
-                    currentSound.currentTime = 0;
-                    await currentSound.play();
-                } catch (error) {
-                    console.error("Initial sound test failed:", error);
-                    soundEnabled = false;
-                    updateSoundButton();
-                }
+           } else {
+            // No weather searched yet.
+            // Enable sound, but don't play anything.
+            stopWeatherSound();
             }
         });
 
@@ -3505,4 +3495,4 @@
 
 </body>
 
-    </html>
+</html>
