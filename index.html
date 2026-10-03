@@ -1468,46 +1468,248 @@
         }
 
     
-        /* WEATHER TEST LAB */
-        .test-lab{margin-top:26px;padding:24px;border-radius:22px;background:rgba(255,255,255,.86);border:1px solid rgba(255,255,255,.9);box-shadow:0 12px 35px rgba(40,57,90,.07);backdrop-filter:blur(12px)}
-        .test-lab-header{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:18px}
-        .test-lab-title{font-size:20px;margin-bottom:5px;color:#273147}
-        .test-lab-description{color:#727d90;font-size:14px;line-height:1.55}
-        .test-lab-badge{flex-shrink:0;padding:7px 10px;border-radius:999px;background:#eef1ff;color:#5969d5;font-size:11px;font-weight:800;letter-spacing:.8px}
-        .test-weather-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-        .test-weather-button{min-height:82px;padding:12px;border:1px solid #e3e7f0;border-radius:16px;background:rgba(255,255,255,.92);color:#273147;cursor:pointer;text-align:left;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
-        .test-weather-button:hover{transform:translateY(-2px);border-color:#aeb8eb;box-shadow:0 8px 22px rgba(40,57,90,.10)}
-        .test-weather-button.active{border-color:#6678df;background:#f4f5ff;box-shadow:0 0 0 3px rgba(102,120,223,.10)}
-        .test-weather-icon{display:block;font-size:25px;margin-bottom:6px}
-        .test-weather-name{display:block;font-size:13px;font-weight:800}
-        .test-weather-action{display:block;margin-top:2px;color:#7b8495;font-size:11px}
-        .test-lab-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:18px;padding-top:16px;border-top:1px solid rgba(39,49,71,.10)}
-        .test-status{color:#667085;font-size:13px;line-height:1.45}
-        .test-stop-button{border:none;border-radius:12px;padding:10px 15px;background:#273147;color:white;font-size:13px;font-weight:700;cursor:pointer}
-        @media(max-width:700px){.test-lab{padding:20px}.test-lab-header{flex-direction:column;gap:10px}.test-weather-grid{grid-template-columns:repeat(2,1fr)}.test-lab-controls{align-items:flex-start;flex-direction:column}.test-stop-button{width:100%}}
+        /* =====================================
+           WEATHER TEST LAB
+        ===================================== */
 
-        /* STRONG STORM READABILITY OVERRIDE */
-        body.stormy .header h1,
-        body.stormy .subtitle,
-        body.stormy .location h2,
-        body.stormy .location p,
-        body.stormy .temperature,
-        body.stormy .condition,
-        body.stormy .stat-card p,
-        body.stormy .stat-card h3,
-        body.stormy .advice-card h3,
-        body.stormy .summary-card p,
-        body.stormy .summary-card p:last-child{
-            color:#172033;
+        .bottom-tools {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            width: 100%;
+            margin-top: 42px;
+            padding-top: 22px;
+            border-top: 1px solid rgba(39, 49, 71, 0.16);
         }
+
+        .test-lab-trigger {
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 14px;
+            padding: 11px 15px;
+            background: rgba(255, 255, 255, 0.88);
+            color: #273147;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(40, 57, 90, 0.08);
+            backdrop-filter: blur(12px);
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+
+        .test-lab-trigger:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.96);
+        }
+
+        .test-lab-panel {
+            position: fixed;
+            left: 50%;
+            bottom: 24px;
+            z-index: 50;
+            width: min(680px, calc(100% - 28px));
+            max-height: calc(100vh - 48px);
+            overflow-y: auto;
+            padding: 24px;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(255, 255, 255, 0.95);
+            box-shadow: 0 24px 70px rgba(20, 28, 45, 0.24);
+            backdrop-filter: blur(18px);
+            transform: translate(-50%, 120%);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: transform 0.3s ease, opacity 0.25s ease, visibility 0.25s ease;
+        }
+
+        .test-lab-panel.open {
+            transform: translate(-50%, 0);
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .test-lab-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 49;
+            background: rgba(15, 22, 36, 0.24);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.25s ease, visibility 0.25s ease;
+        }
+
+        .test-lab-backdrop.open {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .test-lab-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .test-lab-title {
+            font-size: 20px;
+            color: #273147;
+            margin-bottom: 5px;
+        }
+
+        .test-lab-description {
+            color: #727d90;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .test-lab-close {
+            width: 36px;
+            height: 36px;
+            flex-shrink: 0;
+            border: none;
+            border-radius: 10px;
+            background: #f0f2f7;
+            color: #273147;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .test-weather-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .test-weather-button {
+            min-height: 82px;
+            padding: 12px;
+            border: 1px solid #e3e7f0;
+            border-radius: 16px;
+            background: #fff;
+            color: #273147;
+            cursor: pointer;
+            text-align: left;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .test-weather-button:hover {
+            transform: translateY(-2px);
+            border-color: #aeb8eb;
+            box-shadow: 0 8px 22px rgba(40, 57, 90, 0.10);
+        }
+
+        .test-weather-button.active {
+            border-color: #6678df;
+            background: #f4f5ff;
+            box-shadow: 0 0 0 3px rgba(102, 120, 223, 0.10);
+        }
+
+        .test-weather-icon {
+            display: block;
+            font-size: 25px;
+            margin-bottom: 6px;
+        }
+
+        .test-weather-name {
+            display: block;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .test-weather-action {
+            display: block;
+            margin-top: 2px;
+            color: #7b8495;
+            font-size: 11px;
+        }
+
+        .test-lab-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 18px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(39, 49, 71, 0.10);
+        }
+
+        .test-status {
+            color: #667085;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .test-stop-button {
+            border: none;
+            border-radius: 12px;
+            padding: 10px 15px;
+            background: #273147;
+            color: white;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* =====================================
+           STORM READABILITY FIX
+        ===================================== */
+
         body.stormy .hero-card,
         body.stormy .stat-card,
         body.stormy .advice-card,
-        body.stormy .summary-card{
-            background:rgba(255,255,255,.94);
-            color:#172033;
+        body.stormy .summary-card {
+            color: #172033;
         }
-        body.stormy .card-label{color:#5367df}
+
+        body.stormy .hero-card h2,
+        body.stormy .hero-card .temperature,
+        body.stormy .stat-card h3,
+        body.stormy .advice-card h3,
+        body.stormy .summary-card p:last-child {
+            color: #172033;
+        }
+
+        body.stormy .hero-card p,
+        body.stormy .condition,
+        body.stormy .stat-card p {
+            color: #687386;
+        }
+
+        body.stormy .card-label {
+            color: #596bd5;
+        }
+
+        @media (max-width: 700px) {
+            .bottom-tools {
+                margin-top: 32px;
+                padding-top: 18px;
+            }
+
+            .test-lab-panel {
+                bottom: 14px;
+                width: calc(100% - 20px);
+                padding: 20px;
+                max-height: calc(100vh - 28px);
+            }
+
+            .test-weather-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .test-lab-controls {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .test-stop-button {
+                width: 100%;
+            }
+        }
 
     </style>
 
@@ -1899,49 +2101,65 @@
 
         </section>
 
+        <!-- Bottom Tools -->
+        <div class="bottom-tools">
+            <button id="testLabTrigger" class="test-lab-trigger" type="button">
+                🧪 Weather Test
+            </button>
 
-        <!-- WEATHER TEST LAB -->
-        <section class="test-lab" id="weatherTestLab">
+            <a class="connect-link" href="https://www.linkedin.com/in/-faizanali/" target="_blank" rel="noopener noreferrer" aria-label="Connect with developer on LinkedIn" title="Connect with developer">
+                <span class="linkedin-icon">in</span>
+                <span class="connect-text">Connect with Dev</span>
+            </a>
+        </div>
+
+        <div id="testLabBackdrop" class="test-lab-backdrop"></div>
+
+        <section id="testLabPanel" class="test-lab-panel" aria-hidden="true">
             <div class="test-lab-header">
                 <div>
                     <p class="card-label">WEATHER TEST LAB</p>
-                    <h2 class="test-lab-title">Experience every weather mode</h2>
+                    <h2 class="test-lab-title">Preview weather modes</h2>
                     <p class="test-lab-description">
-                        Preview weather animations and sounds without waiting for real weather.
+                        Test the animation and sound for each weather condition
+                        without waiting for real weather.
                     </p>
                 </div>
-                <span class="test-lab-badge">DEMO MODE</span>
+
+                <button id="testLabClose" class="test-lab-close" type="button" aria-label="Close weather test">
+                    ×
+                </button>
             </div>
 
             <div class="test-weather-grid">
                 <button class="test-weather-button" type="button" data-test-theme="sunny" data-test-code="0">
                     <span class="test-weather-icon">☀️</span>
                     <span class="test-weather-name">Sunny</span>
-                    <span class="test-weather-action">Sunny.mp3</span>
+                    <span class="test-weather-action">Sunny.mp3 + clear sky</span>
                 </button>
 
                 <button class="test-weather-button" type="button" data-test-theme="cloudy" data-test-code="3">
                     <span class="test-weather-icon">☁️</span>
                     <span class="test-weather-name">Cloudy</span>
-                    <span class="test-weather-action">Clouds + ambience</span>
+                    <span class="test-weather-action">Cloud animation + wind</span>
                 </button>
 
                 <button class="test-weather-button" type="button" data-test-theme="rainy" data-test-code="61">
                     <span class="test-weather-icon">🌧️</span>
                     <span class="test-weather-name">Rain</span>
-                    <span class="test-weather-action">Rain + Rain.mp3</span>
+                    <span class="test-weather-action">Rain animation + sound</span>
                 </button>
 
                 <button class="test-weather-button" type="button" data-test-theme="heavy-rain" data-test-code="65">
                     <span class="test-weather-icon">🌧️</span>
                     <span class="test-weather-name">Heavy Rain</span>
-                    <span class="test-weather-action">Heavy rain sound</span>
+                    <span class="test-weather-action">Heavy rain + sound</span>
                 </button>
 
                 <button class="test-weather-button" type="button" data-test-theme="snowy" data-test-code="73">
                     <span class="test-weather-icon">❄️</span>
                     <span class="test-weather-name">Snow</span>
-                    <span class="test-weather-action">Snow + ambience</span>
+                    <span class="test-weather-action">Snow animation + wind</span>
                 </button>
 
                 <button class="test-weather-button" type="button" data-test-theme="stormy" data-test-code="95">
@@ -1952,22 +2170,15 @@
             </div>
 
             <div class="test-lab-controls">
-                <p class="test-status" id="testStatus">
-                    Select a weather mode to preview its animation and sound.
+                <p id="testStatus" class="test-status">
+                    Select a weather mode to preview it.
                 </p>
-                <button class="test-stop-button" type="button" id="testStopButton">
+
+                <button id="testStopButton" class="test-stop-button" type="button">
                     Stop Test
                 </button>
             </div>
         </section>
-
-        <!-- Connect With Developer -->
-        <div class="connect-dev">
-            <a class="connect-link" href="https://www.linkedin.com/in/-faizanali/" target="_blank" rel="noopener noreferrer" aria-label="Connect with developer on LinkedIn" title="Connect with developer">
-                <span class="linkedin-icon">in</span>
-                <span class="connect-text">Connect with Dev</span>
-            </a>
-        </div>
 
     </main>
 
@@ -2109,7 +2320,8 @@
         ===================================== */
 
         /*
-         * Files expected beside index.html:
+         * Required files inside GitHub Pages:
+         *
          * static/sounds/Sunny.mp3
          * static/sounds/Rain.mp3
          * static/sounds/Heavy_rain.mp3
@@ -2141,14 +2353,19 @@
         function stopWeatherSound() {
             Object.values(weatherSounds).forEach(function(audio) {
                 audio.pause();
-                try { audio.currentTime = 0; } catch (e) {}
+
+                try {
+                    audio.currentTime = 0;
+                } catch (error) {}
             });
+
             currentSound = null;
         }
 
         function getWeatherSound(theme, weatherCode) {
-            if (theme === "sunny") return weatherSounds.sunny;
-            if (theme === "stormy") return weatherSounds.storm;
+            if (theme === "stormy") {
+                return weatherSounds.storm;
+            }
 
             if (theme === "rainy" || theme === "heavy-rain") {
                 if (
@@ -2159,7 +2376,12 @@
                 ) {
                     return weatherSounds.heavyRain;
                 }
+
                 return weatherSounds.rain;
+            }
+
+            if (theme === "sunny") {
+                return weatherSounds.sunny;
             }
 
             if (
@@ -2176,19 +2398,28 @@
         async function playWeatherSound(theme, weatherCode) {
             stopWeatherSound();
 
-            if (!soundEnabled) return false;
+            if (!soundEnabled) {
+                return false;
+            }
 
             const nextSound = getWeatherSound(theme, weatherCode);
-            if (!nextSound) return false;
+
+            if (!nextSound) {
+                return false;
+            }
 
             currentSound = nextSound;
 
             try {
-                currentSound.currentTime = 0;
-                await currentSound.play();
+                nextSound.currentTime = 0;
+                await nextSound.play();
                 return true;
             } catch (error) {
                 console.error("Weather sound could not play:", error);
+
+                soundEnabled = false;
+                updateSoundButton();
+
                 return false;
             }
         }
@@ -2213,23 +2444,22 @@
                 return;
             }
 
-            /*
-             * This is a real user gesture, so mobile Chrome
-             * can start audio here.
-             */
             if (lastWeatherTheme !== null) {
-                await playWeatherSound(
+                const started = await playWeatherSound(
                     lastWeatherTheme,
                     lastWeatherCode
                 );
+
+                if (!started) {
+                    soundButton.textContent = "⚠️ Audio unavailable";
+                }
             } else {
                 /*
-                 * If no city has been searched yet, use Sunny.mp3
-                 * as a simple audio test.
+                 * User gesture unlocks audio before any weather search.
+                 * Use Sunny.mp3 as the initial confirmation.
                  */
-                currentSound = weatherSounds.sunny;
-
                 try {
+                    currentSound = weatherSounds.sunny;
                     currentSound.currentTime = 0;
                     await currentSound.play();
                 } catch (error) {
@@ -2659,12 +2889,10 @@
 
             /* Weather sound */
 
-            if (soundEnabled) {
-                playWeatherSound(
-                    visual.theme,
-                    weather.weather_code
-                );
-            }
+            playWeatherSound(
+                visual.theme,
+                weather.weather_code
+            );
 
 
             /* Dashboard */
@@ -2903,106 +3131,8 @@
     </script>
 
 
-
-    <!-- WEATHER TEST LAB CONTROLLER -->
-    <script>
-    (function () {
-        "use strict";
-
-        const testButtons = document.querySelectorAll(".test-weather-button");
-        const testStatus = document.getElementById("testStatus");
-        const testStopButton = document.getElementById("testStopButton");
-
-        function clearActiveTests() {
-            testButtons.forEach(function(button) {
-                button.classList.remove("active");
-            });
-        }
-
-        function applyTestTheme(theme) {
-            document.body.classList.remove(
-                "sunny", "cloudy", "rainy", "foggy", "snowy", "stormy"
-            );
-
-            document.body.classList.add(
-                theme === "heavy-rain" ? "rainy" : theme
-            );
-
-            rainContainer.style.display =
-                (theme === "rainy" ||
-                 theme === "heavy-rain" ||
-                 theme === "stormy")
-                    ? "block"
-                    : "none";
-
-            snowContainer.style.display =
-                theme === "snowy" ? "block" : "none";
-        }
-
-        testButtons.forEach(function(button) {
-            button.addEventListener("click", async function(event) {
-                event.preventDefault();
-
-                const theme = button.dataset.testTheme;
-                const weatherCode = Number(button.dataset.testCode);
-
-                const names = {
-                    sunny: "Sunny",
-                    cloudy: "Cloudy",
-                    rainy: "Rain",
-                    "heavy-rain": "Heavy Rain",
-                    snowy: "Snow",
-                    stormy: "Thunderstorm"
-                };
-
-                clearActiveTests();
-                button.classList.add("active");
-                applyTestTheme(theme);
-
-                /*
-                 * This button click is a direct user gesture.
-                 * Therefore audio can be started safely on mobile.
-                 */
-                soundEnabled = true;
-                updateSoundButton();
-
-                const soundTheme =
-                    theme === "heavy-rain" ? "heavy-rain" : theme;
-
-                const started = await playWeatherSound(
-                    soundTheme,
-                    weatherCode
-                );
-
-                testStatus.textContent = started
-                    ? names[theme] + " preview is running — animation + sound are active."
-                    : names[theme] + " animation is active, but audio could not play. Check the MP3 path.";
-            });
-        });
-
-        testStopButton.addEventListener("click", function() {
-            clearActiveTests();
-            stopWeatherSound();
-
-            soundEnabled = false;
-            updateSoundButton();
-
-            document.body.classList.remove(
-                "sunny", "cloudy", "rainy", "foggy", "snowy", "stormy"
-            );
-
-            rainContainer.style.display = "none";
-            snowContainer.style.display = "none";
-
-            testStatus.textContent =
-                "Test stopped. Select a weather mode to preview it again.";
-        });
-    })();
-    </script>
-
     <!-- =====================================
          ROBUST SEARCH CONTROLLER
-         Keeps search independent from form submission.
          ===================================== -->
     <script>
     (function () {
@@ -3013,38 +3143,22 @@
         const button = document.getElementById("searchButton");
         const error = document.getElementById("errorMessage");
         const loading = document.getElementById("loading");
-        const dashboard = document.getElementById("weatherDashboard");
-        const emptyState = document.getElementById("emptyState");
 
         if (!input || !button) return;
 
         function setLoading(value) {
-            if (loading) loading.classList.toggle("hidden", !value);
+            if (loading) {
+                loading.classList.toggle("hidden", !value);
+            }
+
             button.disabled = value;
             button.textContent = value ? "Searching..." : "Search";
         }
 
         function setError(message) {
-            if (error) error.textContent = message || "";
-        }
-
-        function visual(code) {
-            if (code === 0) return { icon: "☀️", theme: "sunny", condition: "Clear sky" };
-            if (code <= 3) return { icon: "☁️", theme: "cloudy", condition: "Cloudy" };
-            if (code === 45 || code === 48) return { icon: "🌫️", theme: "foggy", condition: "Foggy" };
-            if (code >= 51 && code <= 67) return { icon: "🌧️", theme: "rainy", condition: "Rainy" };
-            if (code >= 71 && code <= 77) return { icon: "❄️", theme: "snowy", condition: "Snowy" };
-            if (code >= 80 && code <= 82) return { icon: "🌦️", theme: "rainy", condition: "Rain showers" };
-            if (code >= 85 && code <= 86) return { icon: "🌨️", theme: "snowy", condition: "Snow showers" };
-            if (code >= 95) return { icon: "⛈️", theme: "stormy", condition: "Thunderstorm" };
-            return { icon: "🌤️", theme: "cloudy", condition: "Partly cloudy" };
-        }
-
-        function adviceFor(code, rainProbability) {
-            if (code >= 95) return "Carry an umbrella and avoid exposed areas during thunderstorms.";
-            if (rainProbability >= 60 || (code >= 51 && code <= 82)) return "An umbrella may be useful today.";
-            if (code >= 71 && code <= 86) return "Dress warmly and be careful on slippery surfaces.";
-            return "No umbrella is expected to be necessary right now.";
+            if (error) {
+                error.textContent = message || "";
+            }
         }
 
         async function searchWeatherStandalone() {
@@ -3066,9 +3180,13 @@
                     "&count=1&language=en&format=json";
 
                 const geoResponse = await fetch(geoURL);
-                if (!geoResponse.ok) throw new Error("Unable to find the city.");
+
+                if (!geoResponse.ok) {
+                    throw new Error("Unable to find the city.");
+                }
 
                 const geoData = await geoResponse.json();
+
                 if (!geoData.results || !geoData.results.length) {
                     throw new Error("City not found. Please check the city name.");
                 }
@@ -3076,85 +3194,312 @@
                 const place = geoData.results[0];
 
                 const weatherURL =
-                    "https://api.open-meteo.com/v1/forecast?latitude=" + place.latitude +
-                    "&longitude=" + place.longitude +
+                    "https://api.open-meteo.com/v1/forecast?latitude=" +
+                    place.latitude +
+                    "&longitude=" +
+                    place.longitude +
                     "&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m" +
                     "&hourly=precipitation_probability&forecast_days=1&timezone=auto";
 
                 const weatherResponse = await fetch(weatherURL);
-                if (!weatherResponse.ok) throw new Error("Unable to fetch weather data.");
+
+                if (!weatherResponse.ok) {
+                    throw new Error("Unable to fetch weather data.");
+                }
 
                 const weatherData = await weatherResponse.json();
                 const current = weatherData.current;
-                const code = Number(current.weather_code);
-                const info = visual(code);
+
+                const weatherCode = Number(current.weather_code);
+
                 const rainProbability = Number(
-                    weatherData.hourly && weatherData.hourly.precipitation_probability
+                    weatherData.hourly &&
+                    weatherData.hourly.precipitation_probability
                         ? weatherData.hourly.precipitation_probability[0] || 0
                         : 0
                 );
 
-                const setText = (id, value) => {
-                    const el = document.getElementById(id);
-                    if (el) el.textContent = value;
+                function getCondition(code) {
+                    if (code === 0) return "Clear sky";
+                    if ([1, 2, 3].includes(code)) return "Cloudy";
+                    if ([45, 48].includes(code)) return "Foggy";
+
+                    if (
+                        [51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82]
+                            .includes(code)
+                    ) {
+                        return "Rainy";
+                    }
+
+                    if ([71, 73, 75, 77, 85, 86].includes(code)) {
+                        return "Snowy";
+                    }
+
+                    if ([95, 96, 99].includes(code)) {
+                        return "Thunderstorm";
+                    }
+
+                    return "Cloudy";
+                }
+
+                const conditionText = getCondition(weatherCode);
+
+                let umbrellaText =
+                    "No umbrella is expected to be necessary right now.";
+
+                if (
+                    rainProbability >= 60 ||
+                    conditionText === "Rainy" ||
+                    conditionText === "Thunderstorm"
+                ) {
+                    umbrellaText = "Carry an umbrella today.";
+                } else if (rainProbability >= 30) {
+                    umbrellaText = "You may want to carry an umbrella.";
+                }
+
+                let summaryText =
+                    place.name +
+                    ": " +
+                    conditionText +
+                    ", " +
+                    Math.round(current.temperature_2m) +
+                    "°C with " +
+                    Math.round(current.relative_humidity_2m) +
+                    "% humidity.";
+
+                if (rainProbability >= 60) {
+                    summaryText += " Rain is quite likely today.";
+                } else if (rainProbability >= 30) {
+                    summaryText += " There is a chance of rain.";
+                }
+
+                const data = {
+                    location: {
+                        city: place.name,
+                        country: place.country || place.country_code || ""
+                    },
+                    weather: {
+                        temperature: current.temperature_2m,
+                        condition: conditionText,
+                        rain_probability: rainProbability,
+                        humidity: current.relative_humidity_2m,
+                        wind_speed: current.wind_speed_10m,
+                        weather_code: weatherCode
+                    },
+                    advice: {
+                        umbrella: umbrellaText
+                    },
+                    summary: summaryText
                 };
 
-                setText("locationName", place.name || city);
-                setText("countryName", place.country || "");
-                setText("temperature", Math.round(current.temperature_2m) + "°");
-                setText("condition", info.condition);
-                setText("rainProbability", rainProbability + "%");
-                setText("humidity", Math.round(current.relative_humidity_2m) + "%");
-                setText("windSpeed", Math.round(current.wind_speed_10m) + " km/h");
-                setText("weatherIcon", info.icon);
-                setText("umbrellaAdvice", adviceFor(code, rainProbability));
-                setText(
-                    "summary",
-                    place.name + ": " + info.condition + ", " +
-                    Math.round(current.temperature_2m) + "°C with " +
-                    Math.round(current.relative_humidity_2m) + "% humidity."
-                );
-
-                document.body.classList.remove("sunny", "cloudy", "rainy", "foggy", "snowy", "stormy");
-                document.body.classList.add(info.theme);
-
-                if (dashboard) dashboard.classList.remove("hidden");
-                if (emptyState) emptyState.classList.add("hidden");
+                /*
+                 * IMPORTANT:
+                 * Always use the main displayWeather() function.
+                 *
+                 * The previous standalone controller updated only the
+                 * text/cards. It skipped the weather effects + sound
+                 * pipeline. That is why real searches showed Rainy
+                 * but did not activate rain animation/sound.
+                 */
+                displayWeather(data);
 
             } catch (err) {
-                setError(err && err.message ? err.message : "Something went wrong. Please try again.");
-                if (dashboard) dashboard.classList.add("hidden");
-                if (emptyState) emptyState.classList.remove("hidden");
+                setError(
+                    err && err.message
+                        ? err.message
+                        : "Something went wrong. Please try again."
+                );
+
+                weatherDashboard.classList.add("hidden");
+                emptyState.classList.remove("hidden");
+
+                stopWeatherSound();
+
             } finally {
                 setLoading(false);
             }
         }
 
-        // Expose only this function globally so the button cannot depend on the older listener.
         window.searchWeatherStandalone = searchWeatherStandalone;
 
-        // The button is type="button", so it can never submit/navigate the form.
-        button.addEventListener("click", function (event) {
+        button.addEventListener("click", function(event) {
             event.preventDefault();
             event.stopPropagation();
+
             searchWeatherStandalone();
         });
 
-        input.addEventListener("keydown", function (event) {
+        input.addEventListener("keydown", function(event) {
             if (event.key === "Enter") {
                 event.preventDefault();
                 event.stopPropagation();
+
                 searchWeatherStandalone();
             }
         });
 
         if (form) {
-            form.addEventListener("submit", function (event) {
+            form.addEventListener("submit", function(event) {
                 event.preventDefault();
                 event.stopPropagation();
                 return false;
             });
         }
+
+    })();
+    </script>
+
+
+    <!-- =====================================
+         WEATHER TEST LAB CONTROLLER
+         ===================================== -->
+    <script>
+    (function () {
+        "use strict";
+
+        const trigger = document.getElementById("testLabTrigger");
+        const panel = document.getElementById("testLabPanel");
+        const backdrop = document.getElementById("testLabBackdrop");
+        const closeButton = document.getElementById("testLabClose");
+        const stopButton = document.getElementById("testStopButton");
+        const status = document.getElementById("testStatus");
+        const testButtons =
+            document.querySelectorAll(".test-weather-button");
+
+        if (!trigger || !panel) return;
+
+        function openLab() {
+            panel.classList.add("open");
+            backdrop.classList.add("open");
+            panel.setAttribute("aria-hidden", "false");
+        }
+
+        function closeLab() {
+            panel.classList.remove("open");
+            backdrop.classList.remove("open");
+            panel.setAttribute("aria-hidden", "true");
+        }
+
+        function clearActive() {
+            testButtons.forEach(function(button) {
+                button.classList.remove("active");
+            });
+        }
+
+        function applyTestTheme(theme) {
+            document.body.classList.remove(
+                "sunny",
+                "cloudy",
+                "rainy",
+                "foggy",
+                "snowy",
+                "stormy"
+            );
+
+            document.body.classList.add(
+                theme === "heavy-rain" ? "rainy" : theme
+            );
+
+            rainContainer.style.display =
+                (
+                    theme === "rainy" ||
+                    theme === "heavy-rain" ||
+                    theme === "stormy"
+                )
+                    ? "block"
+                    : "none";
+
+            snowContainer.style.display =
+                theme === "snowy"
+                    ? "block"
+                    : "none";
+        }
+
+        trigger.addEventListener("click", openLab);
+        closeButton.addEventListener("click", closeLab);
+        backdrop.addEventListener("click", closeLab);
+
+        document.addEventListener("keydown", function(event) {
+            if (event.key === "Escape") {
+                closeLab();
+            }
+        });
+
+        testButtons.forEach(function(button) {
+            button.addEventListener("click", async function(event) {
+                event.preventDefault();
+
+                const theme = button.dataset.testTheme;
+                const code = Number(button.dataset.testCode);
+
+                const names = {
+                    sunny: "Sunny",
+                    cloudy: "Cloudy",
+                    rainy: "Rain",
+                    "heavy-rain": "Heavy Rain",
+                    snowy: "Snow",
+                    stormy: "Thunderstorm"
+                };
+
+                clearActive();
+                button.classList.add("active");
+
+                applyTestTheme(theme);
+
+                /*
+                 * The test button itself is the user's gesture.
+                 * Therefore audio is allowed to start on mobile browsers.
+                 */
+                soundEnabled = true;
+                updateSoundButton();
+
+                const soundTheme =
+                    theme === "heavy-rain"
+                        ? "heavy-rain"
+                        : theme;
+
+                const started =
+                    await playWeatherSound(
+                        soundTheme,
+                        code
+                    );
+
+                if (started) {
+                    status.textContent =
+                        names[theme] +
+                        " preview is running — animation + sound are active.";
+                } else {
+                    status.textContent =
+                        names[theme] +
+                        " animation is active, but audio could not play. Check the MP3 filename/path.";
+                }
+            });
+        });
+
+        stopButton.addEventListener("click", function() {
+            clearActive();
+
+            stopWeatherSound();
+
+            soundEnabled = false;
+            updateSoundButton();
+
+            document.body.classList.remove(
+                "sunny",
+                "cloudy",
+                "rainy",
+                "foggy",
+                "snowy",
+                "stormy"
+            );
+
+            rainContainer.style.display = "none";
+            snowContainer.style.display = "none";
+
+            status.textContent =
+                "Test stopped. Select a weather mode to preview it again.";
+        });
+
     })();
     </script>
 
